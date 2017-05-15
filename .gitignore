@@ -3,6 +3,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# private json
+*.json
+
+# virtualenv
+_ccal/
+
 # C extensions
 *.so
 
