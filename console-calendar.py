@@ -3,19 +3,22 @@
 import os
 from inputconfig import Triming
 
+current_dir = os.path.realpath(os.path.dirname(__file__))
+
 # virtualenv
 try:
     from googleoauth import GoogleCal
 except ImportError:
     venv_name = '_ccal'
     osdir = 'Scripts' if os.name is 'nt' else 'bin'
-    current_dir = os.path.realpath(os.path.dirname(__file__))
     venv = os.path.join(venv_name, osdir, 'activate_this.py')
     activate_this = (os.path.join(current_dir, venv))
     # Python 3: exec(open(...).read()), Python 2: execfile(...)
     exec(open(activate_this).read(), dict(__file__=activate_this))
     
     from googleoauth import GoogleCal
+
+
 
 DATE = input('날짜: ')
 assert DATE is not '', '날짜가 없습니다.'
@@ -28,7 +31,7 @@ DURATION_D = input('기간(일): ')
 ALARM = input('알람: ')
 
 config = Triming(DATE, SUMMARY, LOCATION, DESCRIPTION, DURATION_H, DURATION_D, ALARM)
-session = GoogleCal()
+session = GoogleCal(current_dir)
 session.build_calendar()
 
 event = {
