@@ -9,6 +9,9 @@ __pycache__/
 # virtualenv
 _ccal/
 
+# output ics
+*.ics
+
 # C extensions
 *.so
 
