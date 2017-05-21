@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
-import venv
+from venv import os, time, urllib, argparse
+from venv import SCRIPTDIR
 from inputconfig import Configdata
 from googleoauth import GoogleCal
-import argparse
-import time
-import os
-import urllib
 
 def push_event(config):
-    session = GoogleCal(venv.SCRIPTDIR)
+    session = GoogleCal()
     session.build_calendar()
 
     event = {
@@ -24,7 +21,7 @@ def push_event(config):
             'timeZone': 'Asia/Seoul',
         },
     # 'recurrence': [
-    #   'RRULE:FREQ=DAILY;COUNT=' + config.duration_d
+    #   'RRULE:FREQ=DAILY;COUNT=' + config.duration
     # ],
     # 'attendees': [
     #   {'email': 'lpage@example.com'},
@@ -77,7 +74,7 @@ END:VCALLENDAR""".format(
 
     # make ics
     filename = uid + '.ics'
-    abs_path = os.path.join(venv.SCRIPTDIR, filename)
+    abs_path = os.path.join(SCRIPTDIR, filename)
     with open(abs_path, 'wb') as f:
         f.write(ics_format)
 
@@ -101,7 +98,7 @@ def google_link(config):
     return result_link
 
 def write_diary(config):
-    session = GoogleCal(venv.SCRIPTDIR)
+    session = GoogleCal()
     session.build_calendar()
 
     event = {
@@ -121,12 +118,12 @@ def quick_init():
     return query
 
 def quick_add(query):
-    session = GoogleCal(venv.SCRIPTDIR)
+    session = GoogleCal()
     session.build_calendar()
     session.quick_event(query)
 
 def call_list():
-    session = GoogleCal(venv.SCRIPTDIR)
+    session = GoogleCal()
     session.build_calendar()
     #session.calendar_list_all()
     session.calendar_lists()

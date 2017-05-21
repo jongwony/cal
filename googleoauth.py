@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
-from oauth2client import file, client, tools
-from httplib2 import Http
-from apiclient.discovery import build
-import os
+from venv import *
+from inputconfig import date_triming
 
 class GoogleCal:
-    def __init__(self, project_dir):
+    def __init__(self):
+        self.calendar = None
         self.scopes = ['https://www.googleapis.com/auth/calendar']
-        self.store = file.Storage(os.path.join(project_dir, 'storage.json'))
+        self.store = file.Storage(os.path.join(SCRIPTDIR, 'storage.json'))
         self.creds = self.store.get()
         if not self.creds or self.creds.invalid:
-            self.flow = client.flow_from_clientsecrets(os.path.join(project_dir,'client_secret.json'), self.scopes)
+            self.flow = client.flow_from_clientsecrets(os.path.join(SCRIPTDIR,'client_secret.json'), self.scopes)
             self.creds = tools.run(self.flow, self.store)
 
     def build_calendar(self):
@@ -21,12 +20,9 @@ class GoogleCal:
         return self.calendar.events().insert(calendarId='primary', body=event).execute()
 
     def quick_event(self, query):
-        return self.calendar.events().quickAdd(calendarId='primary',text=query).execute()
+        return self.calendar.events().quickAdd(calendarId='primary', text=query).execute()
 
     def calendar_list_all(self):
-        from datetime import datetime
-        import re
-
         page_token = None
         while True:
             events = self.calendar.events().list(calendarId='primary', pageToken=page_token).execute()
@@ -41,10 +37,6 @@ class GoogleCal:
                 break
 
     def calendar_lists(self):
-        from datetime import datetime
-        from inputconfig import date_triming
-        import re
-
         start = input('From: ')
         end = input('To: ')
         start_dt = date_triming(start)
