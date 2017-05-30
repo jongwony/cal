@@ -31,7 +31,7 @@ def date_triming(date):
     # make datetime
     start_date = datetime.strptime('/'.join(trim_date.values()), '/'.join(['%Y', '%m', '%d', '%I', '%M', '%p']))
 
-    near_days = int(query_trim(r'(어제|오늘|내일|모레)', date, 0))
+    near_days = nearday[query_trim(r'(어제|오늘|내일|모레)', date, '오늘')]
     near_delta = timedelta(days=near_days)
 
     return start_date + near_delta

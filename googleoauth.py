@@ -10,7 +10,7 @@ class GoogleCal:
         self.creds = self.store.get()
         if not self.creds or self.creds.invalid:
             self.flow = client.flow_from_clientsecrets(os.path.join(SCRIPTDIR,'client_secret.json'), self.scopes)
-            self.creds = tools.run(self.flow, self.store)
+            self.creds = tools.run_flow(self.flow, self.store)
 
     def build_calendar(self):
         self.calendar = build('calendar', 'v3', http=self.creds.authorize(Http()))
