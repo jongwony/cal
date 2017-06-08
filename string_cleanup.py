@@ -38,7 +38,7 @@ def date_triming(date):
 
 def duration_datetime(date):
     day = int(query_trim(r'(\d+)일', date, 1)) - 1
-    hour = query_trim(r'(\d+)시', date, 1)
-    minute = query_trim(r'(\d+)분', date, 0)
+    hour = int(query_trim(r'(\d+)시', date, 1))
+    minute = int(query_trim(r'(\d+)분', date, 0))
 
     return timedelta(days=day, hours=hour, minutes=minute)
