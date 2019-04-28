@@ -17,7 +17,7 @@ class GoogleCal:
         self.creds = None
         self.calendar = None
         self.scopes = ['https://www.googleapis.com/auth/calendar']
-        if os.path.exists('token.pickle'):
+        if os.path.exists(script_path('token.pickle')):
             with open(script_path('token.pickle'), 'rb') as token:
                 self.creds = pickle.load(token)
         if not self.creds or self.creds.invalid:
@@ -27,7 +27,7 @@ class GoogleCal:
                 flow = InstalledAppFlow.from_client_secrets_file(
                     script_path('credentials.json'), self.scopes)
                 self.creds = flow.run_local_server()
-            with open('token.pickle', 'wb') as token:
+            with open(script_path('token.pickle'), 'wb') as token:
                 pickle.dump(self.creds, token)
 
     def build_calendar(self):
