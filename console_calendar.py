@@ -139,24 +139,13 @@ def call_list():
     session.calendar_lists()
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-i', help='Make ics file', action='store_true')
-    parser.add_argument('-d', help='Write diary', action='store_true')
-    parser.add_argument('-g', help='Google calendar link', action='store_true')
-    parser.add_argument('--no-push', help="Don't push my calendar",
-                        action='store_false')
-    parser.add_argument('-q', help='Push quickAdd calendar', action='store_true')
-    parser.add_argument('-l', help='Calendar lists', action='store_true')
-
-    args = parser.parse_args()
-
-    if args.l:
+def main_parser(kw):
+    if kw.get('l'):
         call_list()
         quit()
 
     # Quick Add Calendar
-    if args.q:
+    if kw.get('q'):
         query = quick_init()
         quick_add(query)
         print('Event created.')
@@ -173,7 +162,7 @@ def main():
     description = input('세부정보: ')
 
     # Diary
-    if args.d:
+    if kw.get('d'):
         config.diary_triming(date, summary, description, duration)
         write_diary(config)
         print('Event created.')
@@ -184,15 +173,30 @@ def main():
     config.triming(date, summary, description, location, duration, alarm)
 
     # ICS file
-    if args.i:
+    if kw.get('i'):
         abs_path = make_ics(config)
         print('ics file created at' + abs_path)
 
     # Google Calendar link
-    if args.g:
+    if kw.get('g'):
         result_link = google_link(config)
         print('google link: ' + result_link)
 
-    if args.no_push:
+    if kw.get('no_push'):
         push_event(config)
         print('Event created.')
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', help='Make ics file', action='store_true')
+    parser.add_argument('-d', help='Write diary', action='store_true')
+    parser.add_argument('-g', help='Google calendar link', action='store_true')
+    parser.add_argument('--no-push', help="Don't push my calendar",
+                        action='store_false')
+    parser.add_argument('-q', help='Push quickAdd calendar', action='store_true')
+    parser.add_argument('-l', help='Calendar lists', action='store_true')
+
+    args = parser.parse_args()
+
+    main_parser(vars(args))
