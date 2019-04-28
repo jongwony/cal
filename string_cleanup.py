@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
-from venv import re, OrderedDict, datetime, timedelta
+import re
+from collections import OrderedDict
+from datetime import datetime, timedelta
+
 
 def query_trim(patch, query, els):
     refine = re.findall(patch, query)
     assert len(refine) <= 1, 'duplicate' + patch
     return refine[0] if refine else els
+
 
 def date_triming(date):
     """{'year':int, 'month':int, 'day':int, 'hour':int, 'minute':int, 'locale':string}"""
@@ -29,12 +33,14 @@ def date_triming(date):
     trim_date['locale'] = noon_criteria[query_trim(r'(오전|오후|AM|PM)', date, 'AM')]
 
     # make datetime
-    start_date = datetime.strptime('/'.join(trim_date.values()), '/'.join(['%Y', '%m', '%d', '%I', '%M', '%p']))
+    start_date = datetime.strptime('/'.join(trim_date.values()), '/'.join(
+        ['%Y', '%m', '%d', '%I', '%M', '%p']))
 
     near_days = nearday[query_trim(r'(어제|오늘|내일|모레)', date, '오늘')]
     near_delta = timedelta(days=near_days)
 
     return start_date + near_delta
+
 
 def duration_datetime(date):
     day = int(query_trim(r'(\d+)일', date, 1)) - 1

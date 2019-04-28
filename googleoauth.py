@@ -1,36 +1,60 @@
 # -*- coding: utf-8 -*-
-from venv import *
-from inputconfig import date_triming
+import re
+import os
+import pickle
+from datetime import datetime
+
+from googleapiclient.discovery import build
+from google.auth.transport.requests import Request
+from google_auth_oauthlib.flow import InstalledAppFlow
+
+from .inputconfig import date_triming
+from .util import script_path
+
 
 class GoogleCal:
     def __init__(self):
+        self.creds = None
         self.calendar = None
         self.scopes = ['https://www.googleapis.com/auth/calendar']
-        self.store = file.Storage(os.path.join(SCRIPTDIR, 'storage.json'))
-        self.creds = self.store.get()
+        if os.path.exists('token.pickle'):
+            with open(script_path('token.pickle'), 'rb') as token:
+                self.creds = pickle.load(token)
         if not self.creds or self.creds.invalid:
-            self.flow = client.flow_from_clientsecrets(os.path.join(SCRIPTDIR,'client_secret.json'), self.scopes)
-            self.creds = tools.run_flow(self.flow, self.store)
+            if self.creds and self.creds.expired and self.creds.refresh_token:
+                self.creds.refresh(Request())
+            else:
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    script_path('credentials.json'), self.scopes)
+                self.creds = flow.run_local_server()
+            with open('token.pickle', 'wb') as token:
+                pickle.dump(self.creds, token)
 
     def build_calendar(self):
-        self.calendar = build('calendar', 'v3', http=self.creds.authorize(Http()))
+        self.calendar = build('calendar', 'v3', credentials=self.creds)
         return self.calendar
 
     def insert_event(self, event):
-        return self.calendar.events().insert(calendarId='primary', body=event).execute()
+        return self.calendar.events().insert(calendarId='primary',
+                                             body=event).execute()
 
     def quick_event(self, query):
-        return self.calendar.events().quickAdd(calendarId='primary', text=query).execute()
+        return self.calendar.events().quickAdd(calendarId='primary',
+                                               text=query).execute()
 
     def calendar_list_all(self):
         page_token = None
         while True:
-            events = self.calendar.events().list(calendarId='primary', pageToken=page_token).execute()
+            events = self.calendar.events().list(calendarId='primary',
+                                                 pageToken=page_token).execute()
             for event in events['items']:
                 if event['status'] == 'confirmed':
-                    date, = {'dateTime', 'date'}.intersection(set(event['start']))
-                    date_trim = re.sub(r'(.*)T(\d+):(\d+)(.*)', r'\1 \2:\3', event['start'][date])
-                    element = '{:<16} {} {}'.format(date_trim, event['summary'], event.get('reminders'))
+                    date, = {'dateTime', 'date'}.intersection(
+                        set(event['start']))
+                    date_trim = re.sub(r'(.*)T(\d+):(\d+)(.*)', r'\1 \2:\3',
+                                       event['start'][date])
+                    element = '{:<16} {} {}'.format(date_trim, event['summary'],
+                                                    event.get('reminders'))
                     print(element)
             page_token = events.get('nextPageToken')
             if not page_token:
@@ -46,10 +70,12 @@ class GoogleCal:
         items = list()
         page_token = None
         while True:
-            events = self.calendar.events().list(calendarId='primary', pageToken=page_token).execute()
+            events = self.calendar.events().list(calendarId='primary',
+                                                 pageToken=page_token).execute()
             for event in events['items']:
                 if 'dateTime' in event['start']:
-                    date = datetime.strptime(event['start']['dateTime'], '%Y-%m-%dT%H:%M:%S+09:00')
+                    date = datetime.strptime(event['start']['dateTime'],
+                                             '%Y-%m-%dT%H:%M:%S+09:00')
                 if 'date' in event['start']:
                     date = datetime.strptime(event['start']['date'], '%Y-%m-%d')
                 items.append((date, EventItems(event)))
@@ -58,8 +84,10 @@ class GoogleCal:
                 s = sorted(items, key=lambda t: t[0])
                 for k, e in s:
                     if start_dt < k < end_dt:
-                        print('{} {}'.format(datetime.strftime(k, '%Y-%m-%d %H:%M'), e.summary))
+                        print('{} {}'.format(
+                            datetime.strftime(k, '%Y-%m-%d %H:%M'), e.summary))
                 break
+
 
 class EventItems:
     def __init__(self, d):

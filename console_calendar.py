@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
-from venv import os, time, urllib, argparse
-from venv import SCRIPTDIR
-from inputconfig import Configdata
-from googleoauth import GoogleCal
+import argparse
+import time
+import urllib
+
+from .googleoauth import GoogleCal
+from .inputconfig import Configdata
+from .util import script_path
+
 
 def push_event(config):
     session = GoogleCal()
@@ -20,13 +24,13 @@ def push_event(config):
             'dateTime': config.end_datetime_format(config.date_eventform),
             'timeZone': 'Asia/Seoul',
         },
-    # 'recurrence': [
-    #   'RRULE:FREQ=DAILY;COUNT=' + config.duration
-    # ],
-    # 'attendees': [
-    #   {'email': 'lpage@example.com'},
-    #   {'email': 'sbrin@example.com'},
-    # ],
+        # 'recurrence': [
+        #   'RRULE:FREQ=DAILY;COUNT=' + config.duration
+        # ],
+        # 'attendees': [
+        #   {'email': 'lpage@example.com'},
+        #   {'email': 'sbrin@example.com'},
+        # ],
         'reminders': {
             'useDefault': False,
             'overrides': [
@@ -37,6 +41,7 @@ def push_event(config):
     }
 
     session.insert_event(event)
+
 
 def make_ics(config):
     uid = time.strftime('%Y-%m-%d_%H%M%S')
@@ -59,14 +64,14 @@ DESCRIPTION:{}
 END:VALARM
 END:VEVENT
 END:VCALLENDAR""".format(
-    uid,
-    config.start_datetime_format(config.date_linkform),
-    config.end_datetime_format(config.date_linkform),
-    config.location,
-    config.summary,
-    config.description,
-    config.alarm,
-    config.description
+        uid,
+        config.start_datetime_format(config.date_linkform),
+        config.end_datetime_format(config.date_linkform),
+        config.location,
+        config.summary,
+        config.description,
+        config.alarm,
+        config.description
     )
 
     # binary encoding
@@ -74,12 +79,13 @@ END:VCALLENDAR""".format(
 
     # make ics
     filename = uid + '.ics'
-    abs_path = os.path.join(SCRIPTDIR, filename)
+    abs_path = script_path(filename)
     with open(abs_path, 'wb') as f:
         f.write(ics_format)
 
-    #os.system('start ' + abspath)
+    # os.system('start ' + abspath)
     return abs_path
+
 
 def google_link(config):
     uri = 'http://www.google.com/calendar/event'
@@ -89,13 +95,14 @@ def google_link(config):
         'dates': '/'.join([
             config.start_datetime_format(config.date_linkform),
             config.end_datetime_format(config.date_linkform)
-            ]),
+        ]),
         'details': config.description,
         'location': config.location,
     }
 
     result_link = uri + '?' + urllib.parse.urlencode(param)
     return result_link
+
 
 def write_diary(config):
     session = GoogleCal()
@@ -113,27 +120,32 @@ def write_diary(config):
     }
     session.insert_event(event)
 
+
 def quick_init():
     query = input('Query: ')
     return query
+
 
 def quick_add(query):
     session = GoogleCal()
     session.build_calendar()
     session.quick_event(query)
 
+
 def call_list():
     session = GoogleCal()
     session.build_calendar()
-    #session.calendar_list_all()
+    # session.calendar_list_all()
     session.calendar_lists()
 
-if __name__ == '__main__':
+
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', help='Make ics file', action='store_true')
     parser.add_argument('-d', help='Write diary', action='store_true')
     parser.add_argument('-g', help='Google calendar link', action='store_true')
-    parser.add_argument('--no-push', help="Don't push my calendar", action='store_false')
+    parser.add_argument('--no-push', help="Don't push my calendar",
+                        action='store_false')
     parser.add_argument('-q', help='Push quickAdd calendar', action='store_true')
     parser.add_argument('-l', help='Calendar lists', action='store_true')
 
@@ -159,7 +171,6 @@ if __name__ == '__main__':
     assert summary is not '', '제목이 없습니다.'
     duration = input('기간: ')
     description = input('세부정보: ')
-
 
     # Diary
     if args.d:

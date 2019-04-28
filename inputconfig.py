@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from venv import datetime
-from string_cleanup import query_trim, date_triming, duration_datetime
+from datetime import datetime
+
+from .string_cleanup import date_triming, duration_datetime
+
 
 class Configdata:
     def __init__(self):
-        self.date = ''
+        self.date = None
         self.summary = ''
         self.location = ''
         self.description = ''
