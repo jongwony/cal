@@ -20,7 +20,7 @@ class GoogleCal:
         if os.path.exists(script_path('token.pickle')):
             with open(script_path('token.pickle'), 'rb') as token:
                 self.creds = pickle.load(token)
-        if not self.creds or self.creds.invalid:
+        if not self.creds or not self.creds.valid:
             if self.creds and self.creds.expired and self.creds.refresh_token:
                 self.creds.refresh(Request())
             else:
