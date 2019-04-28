@@ -5,7 +5,7 @@ __pycache__/
 
 # private json
 *.json
-*.token
+*.pickle
 
 # virtualenv
 _ccal/
