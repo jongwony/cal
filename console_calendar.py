@@ -140,7 +140,7 @@ def call_list():
 
 
 def main_parser(kw):
-    if kw.get('l'):
+    if kw.get('list'):
         call_list()
         quit()
 
